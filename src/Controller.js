@@ -28,15 +28,16 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const URL = 'http://localhost/';
+// const URL = 'http://localhost/';
+const URL = 'https://192.168.4.1/';
 
 function Controller() {
   const classes = useStyles();
   const [isConnected, setIsConnected] = useState(false);
   const [kelvin, setKelvin] = useState(3000);
   const [data, setData] = useState({
-    resolution: 10,
-    name: null,
+    // resolution: 10,
+    // name: null,
     color: {
       r: 0,
       g: 0,
@@ -47,11 +48,11 @@ function Controller() {
   const colorToDevice = (color) => {
     const result = { ...color.rgb };
 
-    if (data.resolution === 10) {
+    // if (data.resolution === 10) {
       result.r *= 4;
       result.g *= 4;
       result.b *= 4;
-    }
+    // }
 
     return result;
   };
@@ -59,26 +60,26 @@ function Controller() {
   const colorFromDevice = (r, g, b) => {
     const color = { r, g, b };
 
-    if (data.resolution === 10) {
+    // if (data.resolution === 10) {
       color.r /= 4;
       color.g /= 4;
       color.b /= 4;
-    }
+    // }
 
     return color;
   };
 
   const handleResponse = (response) => {
-    let [resolution, name, r, g, b] = response.split(',');
+    let [r, g, b] = response.split(',');
 
-    resolution = parseInt(resolution);
+    // resolution = parseInt(resolution);
     r = parseInt(r);
     g = parseInt(g);
     b = parseInt(b);
 
     setData({
-      resolution,
-      name,
+      // resolution,
+      // name,
       color: colorFromDevice(r, g, b),
     });
   };
@@ -141,7 +142,7 @@ function Controller() {
   return (
     <div>
       <Typography variant="h5" component="h3" className={classes.name}>
-        {data.name}
+        RGB Stand
       </Typography>
 
       <Grid container spacing={2}>
@@ -169,9 +170,9 @@ function Controller() {
             </Typography>
             <Slider
               value={kelvin}
-              min={2000}
-              max={10000}
-              defaultValue={3500}
+              min={100}
+              max={8000}
+              defaultValue={3000}
               step={100}
               valueLabelDisplay="auto"
               getAriaValueText={(value) => `${value} K`}
