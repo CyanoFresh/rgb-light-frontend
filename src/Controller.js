@@ -32,9 +32,30 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-function Controller({ url, setIsOnline }) {
+const colorToDevice = (color) => {
+  const { r, g, b } = color.rgb;
+
+  return {
+    r: r * 4,
+    g: g * 4,
+    b: b * 4,
+  };
+};
+
+const colorFromDevice = (r, g, b) => ({
+  r: r / 4,
+  g: g / 4,
+  b: b / 4,
+});
+
+const responseToColor = (response) => {
+  const [r, g, b] = response.split(',');
+
+  return colorFromDevice(+r, +g, +b);
+};
+
+function Controller({ url, setIsOnline, isOnline }) {
   const classes = useStyles();
-  const [isConnected, setIsConnected] = useState(false);
   const [kelvin, setKelvin] = useState(3000);
   const [color, setColor] = useState({
     r: 0,
@@ -42,55 +63,24 @@ function Controller({ url, setIsOnline }) {
     b: 0,
   });
 
-  const colorToDevice = (color) => {
-    const result = { ...color.rgb };
-
-    result.r *= 4;
-    result.g *= 4;
-    result.b *= 4;
-
-    return result;
-  };
-
-  const colorFromDevice = (r, g, b) => {
-    const color = { r, g, b };
-
-    color.r /= 4;
-    color.g /= 4;
-    color.b /= 4;
-
-    return color;
-  };
-
-  const handleResponse = (response) => {
-    let [r, g, b] = response.split(',');
-
-    r = parseInt(r);
-    g = parseInt(g);
-    b = parseInt(b);
-
-    setColor(colorFromDevice(r, g, b));
-  };
-
   useEffect(() => {
     const load = async () => {
       const controller = new AbortController();
       const signal = controller.signal;
 
+      // Cancel request if there is no response
       setTimeout(() => controller.abort(), 1900);
 
       try {
         const response = await fetch(url, { signal });
+        const responseString = await response.text();
+        const color = responseToColor(responseString);
 
-        setIsConnected(true);
         setIsOnline(true);
-
-        handleResponse(await response.text());
+        setColor(color);
       } catch (e) {
         console.log('Request failed: ', e.message);
-
         setIsOnline(false);
-        setIsConnected(false);
       }
     };
 
@@ -98,10 +88,8 @@ function Controller({ url, setIsOnline }) {
 
     load();
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [url]);
+    return () => clearTimeout(timer);
+  }, [url, setIsOnline]);
 
   const handleChange = async (color) => {
     const { r, g, b } = colorToDevice(color);
@@ -110,19 +98,18 @@ function Controller({ url, setIsOnline }) {
       const response = await fetch(`${url}?r=${r}&g=${g}&b=${b}`, {
         method: 'POST',
       });
+      const responseString = await response.text();
+      const color = responseToColor(responseString);
 
-      setIsConnected(true);
       setIsOnline(true);
-
-      handleResponse(await response.text());
+      setColor(color);
     } catch (e) {
       console.log('Change request failed: ', e.message);
-      setIsConnected(false);
       setIsOnline(false);
     }
   };
 
-  if (!isConnected) {
+  if (!isOnline) {
     return (
       <div className={classes.loadingParent}>
         <div><CircularProgress size={100} thickness={2.5}/></div>
@@ -134,7 +121,7 @@ function Controller({ url, setIsOnline }) {
   }
 
   return (
-    <div>
+    <React.Fragment>
       <Typography variant="h5" component="h3" className={classes.name}>
         RGB Stand
       </Typography>
@@ -185,7 +172,7 @@ function Controller({ url, setIsOnline }) {
           </Paper>
         </Grid>
       </Grid>
-    </div>
+    </React.Fragment>
   );
 }
 

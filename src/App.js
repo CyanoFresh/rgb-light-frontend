@@ -24,13 +24,9 @@ const useStyles = makeStyles(theme => ({
     flexGrow: 1,
     fontFamily: 'Product Sans',
     fontWeight: 400,
-    'white-space': 'nowrap',
-    'word-break': 'keep-all',
+    whiteSpace: 'nowrap',
+    wordBreak: 'keep-all',
     marginRight: theme.spacing(),
-    // display: 'none',
-    // [theme.breakpoints.up('sm')]: {
-    //   display: 'block',
-    // },
   },
   content: {
     flexGrow: 1,
@@ -60,7 +56,7 @@ const useStyles = makeStyles(theme => ({
     color: 'inherit',
   },
   inputInput: {
-    padding: theme.spacing(1, 1, 1, 7),
+    padding: theme.spacing(1, 1, 1, 6),
     transition: theme.transitions.create('width'),
     width: '100%',
     [theme.breakpoints.up('sm')]: {
@@ -78,10 +74,6 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  onlineIcon: {
-    // verticalAlign: 'sub',
-    marginLeft: theme.spacing(),
   },
 }));
 
@@ -121,7 +113,7 @@ function App() {
       </AppBar>
       <main className={classes.content}>
         <div className={classes.toolbar}/>
-        <Controller url={deviceUrl} setIsOnline={setIsOnline}/>
+        <Controller url={deviceUrl} isOnline={isOnline} setIsOnline={setIsOnline}/>
       </main>
     </div>
   );
