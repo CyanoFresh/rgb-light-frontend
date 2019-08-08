@@ -22,25 +22,20 @@ const useStyles = makeStyles(theme => ({
   name: {
     marginBottom: theme.spacing(1),
   },
-  centerParent: {
-    display: 'flex',
-    alignItems: 'center',
-  },
   loadingParent: {
     textAlign: 'center',
     padding: theme.spacing(5, 0),
   },
+  chroma: {
+    boxShadow: theme.shadows[1] + ' !important',
+  },
 }));
 
-const colorToDevice = (color) => {
-  const { r, g, b } = color.rgb;
-
-  return {
-    r: r * 4,
-    g: g * 4,
-    b: b * 4,
-  };
-};
+const colorToDevice = (color) => ({
+  r: color.rgb.r * 4,
+  g: color.rgb.g * 4,
+  b: color.rgb.b * 4,
+});
 
 const colorFromDevice = (r, g, b) => ({
   r: r / 4,
@@ -121,58 +116,55 @@ function Controller({ url, setIsOnline, isOnline }) {
   }
 
   return (
-    <React.Fragment>
-      <Typography variant="h5" component="h3" className={classes.name}>
-        RGB Stand
-      </Typography>
-
-      <Grid container spacing={2}>
-        <Grid item lg={3} sm={6} xs={12} className={classes.centerParent}>
-          <ChromePicker
+    <Grid container spacing={2}>
+      <Grid item lg={3} sm={6} xs={12}>
+        <ChromePicker
+          width={'100%'}
+          className={classes.chroma}
+          color={color}
+          onChangeComplete={handleChange}
+          disableAlpha
+        />
+      </Grid>
+      <Grid item lg={3} sm={6} xs={12}>
+        <Paper className={classes.paper}>
+          <Typography id="kelvin-slider-label" gutterBottom>
+            HUE
+          </Typography>
+          <HuePicker
             color={color}
             onChangeComplete={handleChange}
           />
-        </Grid>
-        <Grid item lg={3} sm={6} xs={12}>
-          <Paper className={classes.paper}>
-            <Typography id="kelvin-slider-label" gutterBottom>
-              HUE
-            </Typography>
-            <HuePicker
-              color={color}
-              onChangeComplete={handleChange}
-            />
-          </Paper>
-        </Grid>
-        <Grid item lg={3} sm={6} xs={12}>
-          <Paper className={classes.paper}>
-            <Typography id="kelvin-slider-label" gutterBottom>
-              Temperature, K
-            </Typography>
-            <Slider
-              value={kelvin}
-              min={100}
-              max={8000}
-              defaultValue={3000}
-              step={100}
-              valueLabelDisplay="auto"
-              getAriaValueText={(value) => `${value} K`}
-              onChange={(e, value) => setKelvin(value)}
-              onChangeCommitted={(e, value) => {
-                const [r, g, b] = kelvinToRgb(value);
-
-                return handleChange({
-                  rgb: {
-                    r, g, b,
-                  },
-                });
-              }}
-              aria-labelledby="kelvin-slider-label"
-            />
-          </Paper>
-        </Grid>
+        </Paper>
       </Grid>
-    </React.Fragment>
+      <Grid item lg={3} sm={6} xs={12}>
+        <Paper className={classes.paper}>
+          <Typography id="kelvin-slider-label" gutterBottom>
+            Temperature, K
+          </Typography>
+          <Slider
+            value={kelvin}
+            min={600}
+            max={9000}
+            defaultValue={3000}
+            step={100}
+            valueLabelDisplay="auto"
+            getAriaValueText={(value) => `${value} K`}
+            onChange={(e, value) => setKelvin(value)}
+            onChangeCommitted={(e, value) => {
+              const [r, g, b] = kelvinToRgb(value);
+
+              return handleChange({
+                rgb: {
+                  r, g, b,
+                },
+              });
+            }}
+            aria-labelledby="kelvin-slider-label"
+          />
+        </Paper>
+      </Grid>
+    </Grid>
   );
 }
 

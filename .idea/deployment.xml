@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="ukraine">
+  <component name="PublishConfigData" serverName="ukraine" deleteMissingItems="true">
     <serverData>
       <paths name="ukraine">
         <serverdata>
