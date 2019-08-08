@@ -26,33 +26,28 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
   },
+  loadingParent: {
+    textAlign: 'center',
+    padding: theme.spacing(5, 0),
+  },
 }));
 
-// const URL = 'http://localhost/';
-const URL = 'https://192.168.4.1/';
-
-function Controller() {
+function Controller({ url, setIsOnline }) {
   const classes = useStyles();
   const [isConnected, setIsConnected] = useState(false);
   const [kelvin, setKelvin] = useState(3000);
-  const [data, setData] = useState({
-    // resolution: 10,
-    // name: null,
-    color: {
-      r: 0,
-      g: 0,
-      b: 0,
-    },
+  const [color, setColor] = useState({
+    r: 0,
+    g: 0,
+    b: 0,
   });
 
   const colorToDevice = (color) => {
     const result = { ...color.rgb };
 
-    // if (data.resolution === 10) {
-      result.r *= 4;
-      result.g *= 4;
-      result.b *= 4;
-    // }
+    result.r *= 4;
+    result.g *= 4;
+    result.b *= 4;
 
     return result;
   };
@@ -60,11 +55,9 @@ function Controller() {
   const colorFromDevice = (r, g, b) => {
     const color = { r, g, b };
 
-    // if (data.resolution === 10) {
-      color.r /= 4;
-      color.g /= 4;
-      color.b /= 4;
-    // }
+    color.r /= 4;
+    color.g /= 4;
+    color.b /= 4;
 
     return color;
   };
@@ -72,16 +65,11 @@ function Controller() {
   const handleResponse = (response) => {
     let [r, g, b] = response.split(',');
 
-    // resolution = parseInt(resolution);
     r = parseInt(r);
     g = parseInt(g);
     b = parseInt(b);
 
-    setData({
-      // resolution,
-      // name,
-      color: colorFromDevice(r, g, b),
-    });
+    setColor(colorFromDevice(r, g, b));
   };
 
   useEffect(() => {
@@ -92,14 +80,16 @@ function Controller() {
       setTimeout(() => controller.abort(), 1900);
 
       try {
-        const response = await fetch(URL, { signal });
+        const response = await fetch(url, { signal });
 
         setIsConnected(true);
+        setIsOnline(true);
 
         handleResponse(await response.text());
       } catch (e) {
         console.log('Request failed: ', e.message);
 
+        setIsOnline(false);
         setIsConnected(false);
       }
     };
@@ -111,30 +101,34 @@ function Controller() {
     return () => {
       clearTimeout(timer);
     };
-  }, []);
+  }, [url]);
 
   const handleChange = async (color) => {
     const { r, g, b } = colorToDevice(color);
 
     try {
-      const response = await fetch(`${URL}?r=${r}&g=${g}&b=${b}`, {
+      const response = await fetch(`${url}?r=${r}&g=${g}&b=${b}`, {
         method: 'POST',
       });
 
       setIsConnected(true);
+      setIsOnline(true);
 
       handleResponse(await response.text());
     } catch (e) {
-      console.log('Change failed: ', e.message);
+      console.log('Change request failed: ', e.message);
       setIsConnected(false);
+      setIsOnline(false);
     }
   };
 
   if (!isConnected) {
     return (
-      <div>
+      <div className={classes.loadingParent}>
         <div><CircularProgress size={100} thickness={2.5}/></div>
-        <Box><p>To control the stand, connect to the Wi-Fi Access Point</p></Box>
+        <Box>
+          <p>Connect to the Device's Wi-Fi Access Point (RGB Light xx)</p>
+        </Box>
       </div>
     );
   }
@@ -146,24 +140,24 @@ function Controller() {
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid item lg={3} xs={12} className={classes.centerParent}>
+        <Grid item lg={3} sm={6} xs={12} className={classes.centerParent}>
           <ChromePicker
-            color={data.color}
+            color={color}
             onChangeComplete={handleChange}
           />
         </Grid>
-        <Grid item lg={3} xs={12}>
+        <Grid item lg={3} sm={6} xs={12}>
           <Paper className={classes.paper}>
             <Typography id="kelvin-slider-label" gutterBottom>
               HUE
             </Typography>
             <HuePicker
-              color={data.color}
+              color={color}
               onChangeComplete={handleChange}
             />
           </Paper>
         </Grid>
-        <Grid item lg={3} xs={12}>
+        <Grid item lg={3} sm={6} xs={12}>
           <Paper className={classes.paper}>
             <Typography id="kelvin-slider-label" gutterBottom>
               Temperature, K

@@ -12,7 +12,8 @@ function colorToStr(color) {
 }
 
 function sendState(req, res) {
-  res.status(200).send('10,RGB Stand #1,' + colorToStr(color));
+  res.status(200).send(colorToStr(color));
+
   console.log('Sent state', color);
 }
 
@@ -38,6 +39,4 @@ app.post('/', (req, res, next) => {
   next();
 }, sendState);
 
-app.listen(80, () => {
-  console.log('Listening to requests on port 80');
-});
+app.listen(80, console.log('Listening to requests on port 80'));
