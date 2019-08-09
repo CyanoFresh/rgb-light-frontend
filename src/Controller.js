@@ -54,9 +54,8 @@ const responseToColor = (response) => {
 
 const colors = [
   'red',
+  'rgb(255,32,0)',
   'orangeRed',
-  'orange',
-  'gold',
   'yellow',
   'lime',
   'springGreen',
@@ -149,6 +148,9 @@ function Controller({ url, setIsOnline, isOnline }) {
               saturation: {
                 touchAction: 'none',
               },
+              controls : {
+                touchAction: 'none',
+              },
             },
           }}
           disableAlpha
@@ -174,9 +176,8 @@ function Controller({ url, setIsOnline, isOnline }) {
           <Slider
             value={kelvin}
             min={600}
-            max={9000}
+            max={5000}
             defaultValue={3000}
-            step={100}
             valueLabelDisplay="auto"
             getAriaValueText={(value) => `${value} K`}
             onChange={(e, value) => setKelvin(value)}
