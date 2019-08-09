@@ -1,6 +1,6 @@
 {
-  "short_name": "RGB Stand",
-  "name": "RGB Stand controller",
+  "short_name": "RGB Light",
+  "name": "RGB Light",
   "icons": [
     {
       "src": "android-icon-36x36.png",
@@ -47,6 +47,6 @@
   ],
   "start_url": "./",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#ffffff",
+  "background_color": "#FAFAFA"
 }

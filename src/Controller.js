@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import { ChromePicker, HuePicker } from 'react-color';
+import { ChromePicker, CirclePicker } from 'react-color';
 import Grid from '@material-ui/core/Grid';
 import kelvinToRgb from 'kelvin-to-rgb';
 import Slider from '@material-ui/core/Slider';
@@ -18,6 +18,9 @@ const useStyles = makeStyles(theme => ({
   },
   paper: {
     padding: theme.spacing(2, 3),
+  },
+  paper2: {
+    padding: theme.spacing(4, 3),
   },
   name: {
     marginBottom: theme.spacing(1),
@@ -48,6 +51,24 @@ const responseToColor = (response) => {
 
   return colorFromDevice(+r, +g, +b);
 };
+
+const colors = [
+  'red',
+  'orangeRed',
+  'orange',
+  'gold',
+  'yellow',
+  'lime',
+  'springGreen',
+  'cyan',
+  'Aquamarine',
+  'DeepSkyBlue',
+  'blue',
+  'rgb(127,0,255)',
+  'Magenta',
+  'rgb(255,0,127)',
+  'rgb(255,0,4)',
+];
 
 function Controller({ url, setIsOnline, isOnline }) {
   const classes = useStyles();
@@ -123,17 +144,25 @@ function Controller({ url, setIsOnline, isOnline }) {
           className={classes.chroma}
           color={color}
           onChangeComplete={handleChange}
+          styles={{
+            'default': {
+              saturation: {
+                touchAction: 'none',
+              },
+            },
+          }}
           disableAlpha
         />
       </Grid>
       <Grid item lg={3} sm={6} xs={12}>
-        <Paper className={classes.paper}>
-          <Typography id="kelvin-slider-label" gutterBottom>
-            HUE
-          </Typography>
-          <HuePicker
+        <Paper className={classes.paper2}>
+          <CirclePicker
             color={color}
             onChangeComplete={handleChange}
+            width="100%"
+            circleSize={40}
+            circleSpacing={17}
+            colors={colors}
           />
         </Paper>
       </Grid>
