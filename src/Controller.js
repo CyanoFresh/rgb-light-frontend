@@ -8,6 +8,7 @@ import Grid from '@material-ui/core/Grid';
 import kelvinToRgb from 'kelvin-to-rgb';
 import Slider from '@material-ui/core/Slider';
 import Paper from '@material-ui/core/Paper';
+import Button from '@material-ui/core/Button';
 
 const useStyles = makeStyles(theme => ({
   loadingWrapper: {
@@ -46,10 +47,15 @@ const colorFromDevice = (r, g, b) => ({
   b: b / 4,
 });
 
-const responseToColor = (response) => {
-  const [r, g, b] = response.split(',');
+const responseToState = (response) => {
+  const [on, r, g, b] = response.split(',');
 
-  return colorFromDevice(+r, +g, +b);
+  const color = colorFromDevice(+r, +g, +b);
+
+  return {
+    on: Boolean(+on),
+    color,
+  };
 };
 
 const colors = [
@@ -69,59 +75,58 @@ const colors = [
   'rgb(255,0,4)',
 ];
 
-function Controller({ url, setIsOnline, isOnline }) {
+function Controller({ url, isOnline, setIsOnline }) {
   const classes = useStyles();
   const [kelvin, setKelvin] = useState(3000);
-  const [color, setColor] = useState({
-    r: 0,
-    g: 0,
-    b: 0,
+  const [state, setState] = useState({
+    on: false,
+    color: {
+      r: 0,
+      g: 0,
+      b: 0,
+    },
   });
 
+  const load = async (isUpdate = false, params = '') => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    // Cancel request if there is no response
+    setTimeout(() => controller.abort(), 1900);
+
+    try {
+      const response = await fetch(url + params, {
+        method: isUpdate ? 'POST' : 'GET',
+        signal,
+      });
+      const responseString = await response.text();
+
+      setIsOnline(true);
+      setState(responseToState(responseString));
+    } catch (e) {
+      console.log('Request failed: ', e.message);
+      setIsOnline(false);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      const controller = new AbortController();
-      const signal = controller.signal;
-
-      // Cancel request if there is no response
-      setTimeout(() => controller.abort(), 1900);
-
-      try {
-        const response = await fetch(url, { signal });
-        const responseString = await response.text();
-        const color = responseToColor(responseString);
-
-        setIsOnline(true);
-        setColor(color);
-      } catch (e) {
-        console.log('Request failed: ', e.message);
-        setIsOnline(false);
-      }
-    };
-
     const timer = setInterval(load, 10000);
 
     load();
 
     return () => clearTimeout(timer);
-  }, [url, setIsOnline]);
+  }, [url]);
 
-  const handleChange = async (color) => {
+  const handleColorChange = (color) => {
     const { r, g, b } = colorToDevice(color);
 
-    try {
-      const response = await fetch(`${url}?r=${r}&g=${g}&b=${b}`, {
-        method: 'POST',
-      });
-      const responseString = await response.text();
-      const color = responseToColor(responseString);
+    return load(true, `?on=1&r=${r}&g=${g}&b=${b}`);
+  };
 
-      setIsOnline(true);
-      setColor(color);
-    } catch (e) {
-      console.log('Change request failed: ', e.message);
-      setIsOnline(false);
-    }
+  const handlePower = () => {
+    const { r, g, b } = colorToDevice({ rgb: state.color });
+
+    return load(true, `?on=${+!state.on}&r=${r}&g=${g}&b=${b}`);
   };
 
   if (!isOnline) {
@@ -141,14 +146,14 @@ function Controller({ url, setIsOnline, isOnline }) {
         <ChromePicker
           width={'100%'}
           className={classes.chroma}
-          color={color}
-          onChangeComplete={handleChange}
+          color={state.color}
+          onChangeComplete={handleColorChange}
           styles={{
             'default': {
               saturation: {
                 touchAction: 'none',
               },
-              controls : {
+              controls: {
                 touchAction: 'none',
               },
             },
@@ -159,8 +164,8 @@ function Controller({ url, setIsOnline, isOnline }) {
       <Grid item lg={3} sm={6} xs={12}>
         <Paper className={classes.paper2}>
           <CirclePicker
-            color={color}
-            onChangeComplete={handleChange}
+            color={state.color}
+            onChangeComplete={handleColorChange}
             width="100%"
             circleSize={40}
             circleSpacing={17}
@@ -169,9 +174,20 @@ function Controller({ url, setIsOnline, isOnline }) {
         </Paper>
       </Grid>
       <Grid item lg={3} sm={6} xs={12}>
+        <Button
+          variant="contained"
+          color={state.on ? 'default' : 'primary'}
+          size="large"
+          fullWidth
+          onClick={handlePower}
+        >
+          {state.on ? 'Turn Off' : 'Turn On'}
+        </Button>
+      </Grid>
+      <Grid item lg={3} sm={6} xs={12}>
         <Paper className={classes.paper}>
           <Typography id="kelvin-slider-label" gutterBottom>
-            Temperature, K
+            Color Temperature, K
           </Typography>
           <Slider
             value={kelvin}
@@ -184,7 +200,7 @@ function Controller({ url, setIsOnline, isOnline }) {
             onChangeCommitted={(e, value) => {
               const [r, g, b] = kelvinToRgb(value);
 
-              return handleChange({
+              return handleColorChange({
                 rgb: {
                   r, g, b,
                 },

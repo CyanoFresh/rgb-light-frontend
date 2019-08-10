@@ -3,7 +3,8 @@ const cors = require('cors');
 
 const app = express();
 
-const color = {
+let on = false;
+let color = {
   r: 0, g: 0, b: 0,
 };
 
@@ -12,9 +13,9 @@ function colorToStr(color) {
 }
 
 function sendState(req, res) {
-  res.status(200).send(colorToStr(color));
+  res.status(200).send(+on + ',' + colorToStr(color));
 
-  console.log('Sent state', color);
+  console.log('Sent state', on, color);
 }
 
 app.use(cors());
@@ -22,8 +23,9 @@ app.use(cors());
 app.get('/', sendState);
 
 app.post('/', (req, res, next) => {
-  let { r, g, b } = req.query;
+  let { on: newOn, r, g, b } = req.query;
 
+  on = Boolean(parseInt(newOn));
   r = parseInt(r);
   g = parseInt(g);
   b = parseInt(b);
@@ -32,9 +34,7 @@ app.post('/', (req, res, next) => {
     return res.status(400).send('');
   }
 
-  color.r = r;
-  color.g = g;
-  color.b = b;
+  color = { r, g, b };
 
   next();
 }, sendState);
