@@ -110,7 +110,7 @@ function Controller({ url, isOnline, setIsOnline }) {
   };
 
   useEffect(() => {
-    const timer = setInterval(load, 10000);
+    const timer = setInterval(load, 5000);
 
     load();
 
