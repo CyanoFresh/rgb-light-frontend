@@ -1,5 +1,12 @@
 const express = require('express');
 const cors = require('cors');
+const { colorToStr } = require('./functions');
+
+function sendState(req, res) {
+  res.status(200).send(+on + ',' + colorToStr(color));
+
+  console.log('Sent state', on, color);
+}
 
 const app = express();
 
@@ -7,16 +14,6 @@ let on = false;
 let color = {
   r: 0, g: 0, b: 0,
 };
-
-function colorToStr(color) {
-  return color.r + ',' + color.g + ',' + color.b;
-}
-
-function sendState(req, res) {
-  res.status(200).send(+on + ',' + colorToStr(color));
-
-  console.log('Sent state', on, color);
-}
 
 app.use(cors());
 
@@ -39,4 +36,4 @@ app.post('/', (req, res, next) => {
   next();
 }, sendState);
 
-app.listen(80, console.log('Listening to requests on port 80'));
+app.listen(80, () => console.log('Listening to requests on port 80'));

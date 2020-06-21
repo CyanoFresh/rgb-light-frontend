@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { fade, makeStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import Controller from './Controller';
 import InputBase from '@material-ui/core/InputBase';
 import { useLocalStorage } from './hooks';
@@ -45,29 +42,18 @@ const useStyles = makeStyles(theme => ({
     '&:hover': {
       backgroundColor: fade(theme.palette.common.white, 0.25),
     },
-    marginLeft: theme.spacing(2),
     width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing(1),
-      width: 'auto',
-    },
   },
   inputRoot: {
     color: 'inherit',
   },
   inputInput: {
-    padding: theme.spacing(1, 1, 1, 7),
+    padding: theme.spacing(1, 1, 1, 6),
     transition: theme.transitions.create('width'),
     width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      width: 160,
-      '&:focus': {
-        width: 210,
-      },
-    },
   },
   searchIcon: {
-    width: theme.spacing(7),
+    width: theme.spacing(6.5),
     height: '100%',
     position: 'absolute',
     pointerEvents: 'none',
@@ -87,14 +73,6 @@ function App() {
       <CssBaseline/>
       <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
-            <MenuIcon/>
-          </IconButton>
-
-          <Typography variant="h6" className={classes.title}>
-            RGB-Light
-          </Typography>
-
           <div className={classes.search}>
             <div className={classes.searchIcon}>
               {isOnline ? <Wifi/> : <WifiOff/>}

@@ -9,13 +9,11 @@ import kelvinToRgb from 'kelvin-to-rgb';
 import Slider from '@material-ui/core/Slider';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import config from './config';
 
 const useStyles = makeStyles(theme => ({
-  loadingWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignContent: 'center',
-    justifyContent: 'center',
+  loadingTitle: {
+    marginTop: theme.spacing(3),
   },
   paper: {
     padding: theme.spacing(2, 3),
@@ -58,26 +56,9 @@ const responseToState = (response) => {
   };
 };
 
-const colors = [
-  'red',
-  'rgb(255,32,0)',
-  'orangeRed',
-  'yellow',
-  'lime',
-  'springGreen',
-  'cyan',
-  'Aquamarine',
-  'DeepSkyBlue',
-  'blue',
-  'rgb(127,0,255)',
-  'Magenta',
-  'rgb(255,0,127)',
-  'rgb(255,0,4)',
-];
-
 function Controller({ url, isOnline, setIsOnline }) {
   const classes = useStyles();
-  const [kelvin, setKelvin] = useState(3000);
+  const [kelvin, setKelvin] = useState(config.kelvin);
   const [state, setState] = useState({
     on: false,
     color: {
@@ -92,7 +73,7 @@ function Controller({ url, isOnline, setIsOnline }) {
     const signal = controller.signal;
 
     // Cancel request if there is no response
-    setTimeout(() => controller.abort(), 1900);
+    setTimeout(() => controller.abort(), config.pollTimeout);
 
     try {
       const response = await fetch(url + params, {
@@ -132,9 +113,10 @@ function Controller({ url, isOnline, setIsOnline }) {
   if (!isOnline) {
     return (
       <div className={classes.loadingParent}>
-        <div><CircularProgress size={100} thickness={2.5}/></div>
+        <div><CircularProgress size={90} thickness={3}/></div>
         <Box>
-          <p>Connect to the Device's Wi-Fi Access Point (RGB Light xx)</p>
+          <Typography variant="h4" gutterBottom className={classes.loadingTitle}>Not Connected</Typography>
+          <Typography variant="body2" color="textSecondary" gutterBottom>Connect to Wi-Fi RGB Light</Typography>
         </Box>
       </div>
     );
@@ -169,7 +151,7 @@ function Controller({ url, isOnline, setIsOnline }) {
             width="100%"
             circleSize={40}
             circleSpacing={17}
-            colors={colors}
+            colors={config.colors}
           />
         </Paper>
       </Grid>
