@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -8,6 +8,8 @@ import InputBase from '@material-ui/core/InputBase';
 import { useLocalStorage } from './hooks';
 import Wifi from '@material-ui/icons/Wifi';
 import WifiOff from '@material-ui/icons/WifiOff';
+import { DeviceStateContext, DeviceStateContextProvider } from './deviceStateContext';
+import BatteryChargingFullIcon from '@material-ui/icons/BatteryChargingFull';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -44,6 +46,11 @@ const useStyles = makeStyles(theme => ({
     },
     width: '100%',
   },
+  batteryLevel: {
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(1),
+  },
   inputRoot: {
     color: 'inherit',
   },
@@ -63,37 +70,54 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+function TopMenu({ deviceUrl, onUrlChange, online }) {
+  const classes = useStyles();
+  const [state] = useContext(DeviceStateContext);
+
+  return (
+    <AppBar position='fixed' className={classes.appBar}>
+      <Toolbar>
+        <div className={classes.search}>
+          <div className={classes.searchIcon}>
+            {online ? <Wifi /> : <WifiOff />}
+          </div>
+          <InputBase
+            placeholder='Device URL…'
+            classes={{
+              root: classes.inputRoot,
+              input: classes.inputInput,
+            }}
+            value={deviceUrl}
+            onChange={onUrlChange}
+          />
+        </div>
+        {Boolean(state.batteryLevel) && (
+          <div className={classes.batteryLevel}>
+            <BatteryChargingFullIcon />
+            {state.batteryLevel}%
+          </div>
+        )}
+      </Toolbar>
+    </AppBar>
+  );
+}
+
 function App() {
   const classes = useStyles();
   const [isOnline, setIsOnline] = useState(false);
   const [deviceUrl, setDeviceUrl] = useLocalStorage('device_url', 'http://192.168.4.1/');
 
   return (
-    <div className={classes.root}>
-      <CssBaseline/>
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar>
-          <div className={classes.search}>
-            <div className={classes.searchIcon}>
-              {isOnline ? <Wifi/> : <WifiOff/>}
-            </div>
-            <InputBase
-              placeholder="Device URL…"
-              classes={{
-                root: classes.inputRoot,
-                input: classes.inputInput,
-              }}
-              value={deviceUrl}
-              onChange={(e) => setDeviceUrl(e.target.value)}
-            />
-          </div>
-        </Toolbar>
-      </AppBar>
-      <main className={classes.content}>
-        <div className={classes.toolbar}/>
-        <Controller url={deviceUrl} isOnline={isOnline} setIsOnline={setIsOnline}/>
-      </main>
-    </div>
+    <DeviceStateContextProvider>
+      <CssBaseline />
+      <div className={classes.root}>
+        <TopMenu online={isOnline} deviceUrl={deviceUrl} onUrlChange={(e) => setDeviceUrl(e.target.value)} />
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
+          <Controller url={deviceUrl} isOnline={isOnline} setIsOnline={setIsOnline} />
+        </main>
+      </div>
+    </DeviceStateContextProvider>
   );
 }
 

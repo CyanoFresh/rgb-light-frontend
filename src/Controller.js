@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Typography from '@material-ui/core/Typography';
@@ -10,6 +10,7 @@ import Slider from '@material-ui/core/Slider';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import config from './config';
+import { DeviceStateContext } from './deviceStateContext';
 
 const useStyles = makeStyles(theme => ({
   loadingTitle: {
@@ -46,27 +47,21 @@ const colorFromDevice = (r, g, b) => ({
 });
 
 const responseToState = (response) => {
-  const [on, r, g, b] = response.split(',');
+  const [on, r, g, b, batteryLevel] = response.split(',');
 
   const color = colorFromDevice(+r, +g, +b);
 
   return {
     on: Boolean(+on),
     color,
+    batteryLevel,
   };
 };
 
 function Controller({ url, isOnline, setIsOnline }) {
   const classes = useStyles();
   const [kelvin, setKelvin] = useState(config.kelvin);
-  const [state, setState] = useState({
-    on: false,
-    color: {
-      r: 0,
-      g: 0,
-      b: 0,
-    },
-  });
+  const [state, setState] = useContext(DeviceStateContext);
 
   const load = async (isUpdate = false, params = '') => {
     const controller = new AbortController();
@@ -83,7 +78,7 @@ function Controller({ url, isOnline, setIsOnline }) {
       const responseString = await response.text();
 
       setIsOnline(true);
-      setState(responseToState(responseString));
+      setState(prevState => ({ ...prevState, ...responseToState(responseString) }));
     } catch (e) {
       console.log('Request failed: ', e.message);
       setIsOnline(false);
